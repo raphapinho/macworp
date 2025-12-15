@@ -1,6 +1,7 @@
 """Executor for running workflows. """
 
 import logging
+from worker.utils.environment import activate_micromamba_env, get_nextflow_command_with_env
 from multiprocessing import Process, Queue
 from multiprocessing.connection import Connection
 from multiprocessing.synchronize import Event as EventClass
@@ -91,6 +92,7 @@ class Executor(Process):
         """
         logger = get_logger("executor", self.log_level)
         logger.info("Starting workflow executor.")
+        
 
         while not self.stop_event.is_set():
             try:
@@ -275,3 +277,33 @@ class Executor(Process):
         """
         sanitized_name: str = self.__class__.SANITIZE_REGEX.sub("", name)
         return self.__class__.WHITESPACE_REGEX.sub("_", sanitized_name)
+    
+    def execute_nextflow_workflow_option_a(workflow_path, params):
+        """Executa workflow com ambiente ativado via variáveis de ambiente"""
+        env = activate_micromamba_env("viralflow")
+        
+        cmd = ["nextflow", "run", workflow_path] + params
+        
+        result = subprocess.run(
+            cmd,
+            env=env,  # Passa o ambiente modificado
+            capture_output=True,
+            text=True
+        )
+        
+        return result
+    
+    def execute_nextflow_workflow_option_b(workflow_path, params):
+        """Executa workflow ativando ambiente dentro do shell"""
+        base_cmd = get_nextflow_command_with_env("viralflow")
+        
+        # Adicionar os parâmetros do nextflow
+        cmd = base_cmd + ["run", workflow_path] + params
+        
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True
+        )
+        
+        return result

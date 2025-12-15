@@ -1,21 +1,3 @@
-name: macworp_viralFlow
-channels:
-  - defaults
-  - conda-forge
-dependencies:
-  - libpq
-  - nodejs=18.*
-  - conda-forge::yarn
-  - python=3.12
-  - pip
-  - setuptools
-  - cython
-  - yaml
-  - pip:
-    - -e ./backend[dev]
-    - -e ./worker[dev,demo]
-    - -r ./requirements.txt
-
 # Configuração do worker com ambiente customizado
 execution:
   engines:

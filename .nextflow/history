@@ -1,0 +1,3 @@
+2025-12-15 13:22:47	-	sick_dubinsky	-	bfe3f86de614d1a8355c4309adf0059f	a36085d8-0383-4cb8-9c4a-898ad43414db	nextflow run /home/pinho/ViralFlow/vfnext/main.nf --virus sars-cov2 --help
+2025-12-15 13:23:26	-	stupefied_meitner	-	bfe3f86de614d1a8355c4309adf0059f	072f11ef-c05f-4a12-a3df-86ce7258ed94	nextflow run /home/pinho/ViralFlow/vfnext/main.nf --virus sars-cov2 --help
+2025-12-15 13:26:29	-	trusting_euler	-	bfe3f86de614d1a8355c4309adf0059f	b2220e40-b4f4-4172-ad13-af3856b5c842	nextflow run /home/pinho/ViralFlow/vfnext/main.nf --virus sars-cov2 --help
