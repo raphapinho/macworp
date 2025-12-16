@@ -26,7 +26,8 @@ class NextflowCmdGenerator(CmdGenerator):
     ) -> List[str]:
         # Start `nextflow run -work-dir ... -with-weblog ...`
         command = [
-            str(self.workflow_engine_executable),
+            "/home/pinho/ViralFlow/vfnext/launch_viralflow.sh", #inicialização do viralflow dentro do macworp
+            #str(self.workflow_engine_executable), 
             "run",
             "-work-dir",
             str(work_dir),
