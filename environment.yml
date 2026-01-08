@@ -16,14 +16,4 @@ dependencies:
     - -e ./worker[dev,demo]
     - -r ./requirements.txt
 
-# Configuração do worker com ambiente customizado
-execution:
-  engines:
-    nextflow:
-      command: "/usr/local/bin/nextflow-wrapper.sh"
-      environment:
-        pre_activate:
-          - "eval $(micromamba shell hook --shell bash)"
-          - "micromamba activate viralflow"
-
 
