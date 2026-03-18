@@ -3,25 +3,26 @@
 # std imports
 import functools
 import logging
+import time
 from multiprocessing import Pipe, Queue
 from multiprocessing.connection import Connection, wait
 from multiprocessing.synchronize import Event as EventClass
 from pathlib import Path
 from queue import Full as FullQueueError
-import time
 from threading import Thread
 from typing import Any, List, Optional
 
 # external imports
 import pika
-from pika.channel import Channel
 from macworp_utils.exchange.queued_project import QueuedProject
+from pika.channel import Channel
+
+from macworp_worker.executor import Executor
 
 # internal imports
 from macworp_worker.logging import get_logger
 from macworp_worker.web.backend_web_api_client import BackendWebApiClient
 from macworp_worker.web.log_proxy.server import Server as LogProxy
-from macworp_worker.executor import Executor
 
 
 class AckHandler(Thread):
@@ -169,12 +170,63 @@ class Worker:
         self.__log_level: int = log_level
         self.__log_proxy = LogProxy(backend_api_client, log_level)
 
+    def preflight_exec_uuid(self, logger: logging.Logger):
+        """
+        Checks if the execution UUID from the backend API matches the one in the shared storage. This is a preflight check to ensure that the worker is properly connected to the backend and the shared storage before starting to consume jobs. If the UUIDs do not match, it will retry until they do.
+        """
+
+        while True:
+            try:
+                online_exec_uuid = self.__backend_api_client.get_exec_uuid()
+            except Exception as error:
+                logger.warning(
+                    (
+                        "Could not get execution UUID from backend API. This likely means that the worker is not properly connected to the backend or "
+                        "the backend is not properly started. Will retry in a few seconds. Error was: %s"
+                    ),
+                    error,
+                )
+                time.sleep(5)
+                continue
+
+            if not self.__project_data_path.joinpath("exec-uuid.txt").exists():
+                logger.warning(
+                    (
+                        "Execution UUID file not found in shared storage. This likely means that the worker is not properly connected to the shared storage or "
+                        "the shared storage is not properly updated. Will retry in a few seconds."
+                    )
+                )
+                time.sleep(5)
+                continue
+
+            with self.__project_data_path.joinpath("exec-uuid.txt").open("r") as f:
+                offline_exec_uuid = f.read().strip()
+
+            if online_exec_uuid == offline_exec_uuid:
+                break
+            else:
+                logger.warning(
+                    (
+                        "Execution UUID mismatch. Online UUID: %s, Offline UUID: %s. "
+                        "This likely means that the worker is not properly connected to the shared storage or "
+                        "the shared storage is not properly updated. Will retry in a few seconds."
+                    ),
+                    online_exec_uuid,
+                    offline_exec_uuid,
+                )
+                time.sleep(5)
+
+        logger.info("Execution UUID preflight check successful. Online and offline UUID match: %s", online_exec_uuid)
+
     def start(self):
         """
         Starts the worker
         """
         logger = get_logger("worker", self.__log_level)
         logger.info("Starting worker with %i executors.", self.__number_of_workers)
+
+        self.preflight_exec_uuid(logger)
+
 
         project_queue = Queue()
         comm_channels: List[Connection] = []  # type: ignore[annotation-unchecked]

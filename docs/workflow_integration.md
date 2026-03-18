@@ -116,7 +116,7 @@ The following JSON is the definition for the provided Nextflow variant of the in
 
 ### Definition elements
 
-* `engine`: Workflow engine to use. Options: `nextflow` & `snakemake`
+* `engine`: Workflow engine to use. Options: `nextflow` & `snakemake`. Optionally, the engine version can be added separated by a `|`, e.g. `nextflow|24.09.2-edge`. The version is currently used by Nextflow only, as it has the ability to up and downgrade itself.
 * `src`: Source defines the location of the workflow, which can be a local directory or a remote repository. In case of Nextflow it is also possible to run workflows from `nf-core`
     * Local example:
 
@@ -369,7 +369,7 @@ Have a look into the [results demo workflow](./demo_workflows/result_demo/)
 
 ## Recommendation
 1. In general it is a good idea to use publicly available Docker container to manage your dependencies as most workflow engines can download containers by themselves. For help see:
-    * [Nextflow](https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#running-jobs-in-containers)
+    * [Nextflow](https://docs.seqera.io/nextflow/reference/process#container)
     * [Snakemake](https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#running-jobs-in-containers)
 
-    However it is possible to use dependencies installed via Conda or package managers, but it has to be done manually on each worker. 
+    However if MAcWorP is deployed natively, it would be possible to run let the search engine manage the dependencies via conda or use software installed via a package manager. However this need to be setup separatly on each worker and is not tested.
